@@ -2,7 +2,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Arrays;
 
-
 public class WordSort {
     private static ArrayList <String> array;
     private static ArrayList <String> vernacular;
@@ -18,24 +17,52 @@ public class WordSort {
         }
 
         int lastChar = 0;
-        String single;
-        String word;
-        String lastWord;
+        String single, word, lastWord;
+        String previous = "";
+        boolean delimiter;
+        boolean needsMore = false;
 
         for (int i = 0; i < array.size(); i++) {
             for (int j = 0; j < array.get(i).length(); j++) {
 
                 single = array.get(i).substring(j, j+1);
                 word = array.get(i).substring(lastChar, j);
+                delimiter = single.equals(";") || single.equals(":") || single.equals(" ") || single.equals(",") || single.equals("-");
 
-                if (!(single.matches("[a-zA-Z]"))) { //("^.*[^a-zA-Z].*$")
-                    if (word.length() != 0) {
-                        vernacular.add(word);
+                if (!(single.matches("[a-zA-Z]"))) {
+                    if (delimiter) {
+                        if (word.length() != 0) {
+                            if (needsMore) {
+                                vernacular.add(previous + word);
+                                needsMore = false;
+                                previous = "";
+                            } else {
+                                vernacular.add(word);
+                                previous = "";
+                            }
+                        } else {
+                            if (needsMore) {
+                                vernacular.add(previous);
+                                needsMore = false;
+                                previous = "";
+                            }
+                        }
+                    } else {
+                        if (word.length() != 0) {
+                            previous += word;
+                            needsMore = true;
+                        }
                     }
                     lastChar = j+1;
                 } else if (j == array.get(i).length() - 1) {
                     lastWord = array.get(i).substring(lastChar, j+1);
-                    vernacular.add(lastWord);
+                    if (needsMore) {
+                        lastWord = previous + lastWord;
+                        needsMore = false;
+                        vernacular.add(lastWord);
+                    } else {
+                        vernacular.add(lastWord);
+                    }    
                 }
             }
             lastChar = 0;
@@ -49,15 +76,22 @@ public class WordSort {
 
         Object[] sort = vernacular.toArray();
         Arrays.sort(sort);
+        for (int i = 0; i < sort.length; i++) {
+            System.out.println(sort[i]);
+        }
 
         int tally = 1;
         for (int i = 1; i < sort.length; i++) {
             if (sort[i].equals(sort[i-1])) {
                 tally++;
-            } else {
+            } else {        
                 System.out.println(sort[i-1] + ": " + tally);
                 tally = 1;
-            }   
+            }
+            if (i == sort.length - 1) {
+                System.out.println(sort[i] + ": " + tally);
+                tally = 1;
+            }
         }
     }
 }
